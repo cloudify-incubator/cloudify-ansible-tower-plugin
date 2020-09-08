@@ -1,0 +1,717 @@
+##################################################################################
+# Cloudify Ansible Tower built in types and plugins definitions.
+##################################################################################
+
+plugins:
+  plugin:
+    executor: central_deployment_agent
+    source: https://github.com/cloudify-incubator/cloudify-ansible-tower-plugin/archive/1.0.0.zip
+    package_name: cloudify-ansible-tower-plugin
+    package_version: '1.0.0'
+
+data_types:
+
+  cloudify.datatypes.ansible_tower.ConnectionConfig:
+    properties:
+      access_token:
+        description: >
+          User authentication token
+        type: string
+        required: false
+      endpoint:
+        description: >
+            The complete URL to use for the constructed
+            client. This should be without a trailing slash. 
+            Example: https://tower.example.com
+        type: string
+        required: false
+      endpoint_verify:
+        type: boolean
+        default: true
+        required: false
+
+  cloudify.datatypes.ansible_tower.User.config:
+    properties:
+      username:
+        type: string
+        required: false
+      first_name:
+        type: string
+        default: ""
+      last_name:
+        type: string
+        default: ""
+      email:
+        type: string
+        default: ""
+      is_superuser:
+        type: boolean
+        default: false
+      is_system_auditor:
+        type: boolean
+        default: false
+      password:
+        type: string
+        default: ""
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Users/Users_users_create
+        default: {}
+
+  cloudify.datatypes.ansible_tower.Organization.config:
+    properties:
+      name:
+        description: >
+          Name of this organization. (string, required)
+        type: string
+        required: false
+      description:
+        description: >
+          Optional description of this organization. (string, default="")
+        type: string
+        default: ""
+      max_hosts:
+        description: >
+          Maximum number of hosts allowed to be managed by this organization. (integer, default=0)
+        type: integer
+        default: 0
+      custom_virtualenv:
+        description: > 
+          Local absolute file path containing a custom Python virtualenv to use (string, default="")
+        type: string
+        default: ""
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Organizations/Organizations_organizations_create
+        default: {}
+
+  cloudify.datatypes.ansible_tower.Team.config:
+    properties:
+      name:
+        description: >
+          Name of this team. (string, required)
+        type: string
+        required: false
+      description:
+        description: >
+          Optional description of this team. (string, default="")
+        type: string
+        default: ""
+      organization:
+        description: >
+          Inherit permissions from organization roles. (id, required)
+        required: false
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Teams/Teams_teams_create
+        default: {}
+
+  cloudify.datatypes.ansible_tower.CredentialType.config:
+    properties:
+      name:
+        type: string
+        required: false
+      description:
+        type: string
+        default: ""
+      kind:
+        type: string
+        required: false
+      inputs:
+        default: {}
+      injectors:
+        default: {}
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Credential_Types/Credential_Types_credential_types_create
+        default: {}
+
+  cloudify.datatypes.ansible_tower.Credential.config:
+    properties:
+      name:
+        description: >
+          Name of this credential. (string, required)
+        type: string
+        required: false
+      description:
+        description: >
+          Optional description of this credential. (string, default="")
+        type: string
+        default: ""
+      organization:
+        description: >
+          Inherit permissions from organization roles. If provided on creation, do not give either user or team. (id, default=None)
+        required: false
+      credential_type:
+        description: > 
+          Specify the type of credential you want to create. Refer to the Ansible Tower documentation for details on each type. (id, required)
+        required: false
+      inputs:
+        description: >
+          Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax. (json, default={})
+        default: {}
+      user:
+        description: >
+          Used to add user to owner role. If provided, do not give either team or organization. Only valid for creation. (id, default=None)
+        required: false
+      team:
+        description: >
+          used to add team to owner role. If provided, do not give either user or organization. Only valid for creation. (id, default=None)
+        required: false
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Credentials/Credentials_credentials_create
+        default: {}
+
+  cloudify.datatypes.ansible_tower.Project.config:
+    properties:
+      name:
+        required: false
+        description: Name of this project. (string, required)
+      description:
+        required: false
+        description: Optional description of this project. (string, default="")
+        default: ""
+      local_path:
+        required: false
+        description: Local path (relative to PROJECTS_ROOT) containing playbooks and related files for this project. (string, default="")
+      scm_type:
+        required: false
+        description: Specifies the source control system used to store the project. (choice)
+      scm_url:
+        required: false
+        description: The location where the project is stored. (string, default="")
+      scm_branch:
+        required: false
+        description: Specific branch, tag or commit to checkout. (string, default="")
+      scm_refspec:
+        required: false
+        description: For git projects, an additional refspec to fetch. (string, default="")
+      scm_clean:
+        required: false
+        description: Discard any local changes before syncing the project. (boolean, default=False)
+        default: false
+      scm_delete_on_update:
+        required: false
+        description: Delete the project before syncing. (boolean, default=False)
+        default: false
+      credential:
+        required: false
+        description: (id)
+      timeout:
+        required: false
+        description: The amount of time (in seconds) to run before the task is canceled. (integer, default=0)
+        default: 0
+      organization:
+        required: false
+        description: (id)
+      scm_update_on_launch:
+        required: false
+        description: Update the project when a job is launched that uses the project. (boolean, default=False)
+        default: false
+      scm_update_cache_timeout:
+        required: false
+        description: The number of seconds after the last project update ran that a new project update will be launched as a job dependency. (integer, default=0)
+        default: 0
+      allow_override:
+        required: false
+        description: Allow changing the SCM branch or revision in a job template that uses this project. (boolean, default=False)
+        default: false
+      custom_virtualenv:
+        required: false
+        description: Local absolute file path containing a custom Python virtualenv to use (string, default="")
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Projects/Projects_projects_create
+        default: {}
+
+  cloudify.datatypes.ansible_tower.JobTemplate.config:
+    properties:
+      name:
+        required: false
+        description: Name of this job template. (string, required)
+      description:
+        required: false
+        description: Optional description of this job template. (string, default="")
+      job_type:
+        required: false
+        description: ([run, check, scan], default="run")
+        default: run
+      inventory:
+        required: false
+        description: (id, default=``)
+      project:
+        required: false
+        description: (id, default=``)
+      playbook:
+        required: false
+        description: (string, default="")
+      scm_branch:
+        required: false
+        description: Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true. (string, default="")
+      forks:
+        required: false
+        description: (integer, default=0)
+        default: 0
+      limit:
+        required: false
+        description: (string, default="")
+      verbosity:
+        required: false
+        description: (0-5, default=0)
+        default: 0
+      extra_vars:
+        required: false
+        description: (json, default=``)
+      job_tags:
+        required: false
+        description: (string, default="")
+      force_handlers:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      skip_tags:
+        required: false
+        description: (string, default="")
+      start_at_task:
+        required: false
+        description: (string, default="")
+      timeout:
+        required: false
+        description: The amount of time (in seconds) to run before the task is canceled. (integer, default=0)
+        default: 0
+      use_fact_cache:
+        required: false
+        description: If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts at the end of a playbook run to the database and caching facts for use by Ansible. (boolean, default=False)
+      host_config_key:
+        required: false
+        description: (string, default="")
+      ask_scm_branch_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      ask_diff_mode_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      ask_variables_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      ask_limit_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      ask_tags_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      ask_skip_tags_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      ask_job_type_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      ask_verbosity_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      ask_inventory_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      ask_credential_on_launch:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      survey_enabled:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      become_enabled:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      diff_mode:
+        required: false
+        description: If enabled, textual changes made to any templated files on the host are shown in the standard output (boolean, default=False)
+        default: false
+      allow_simultaneous:
+        required: false
+        description: (boolean, default=False)
+        default: false
+      custom_virtualenv:
+        required: false
+        description: Local absolute file path containing a custom Python virtualenv to use (string, default="")
+      job_slice_count:
+        required: false
+        description: The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1. (integer, default=1)
+        default: 1
+      webhook_service:
+        required: false
+        description: Service that webhook requests will be accepted from ([github, gitlab])
+      webhook_credential:
+        required: false
+        description: Personal Access Token for posting back the status to the service API (id, default="")
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Job_Templates/Job_Templates_job_templates_create
+        default: {}
+
+  cloudify.datatypes.ansible_tower.Inventory.config:
+    properties:
+      name:
+        required: false
+        description: Name of this inventory. (string, required)
+      description:
+        required: false
+        description: Optional description of this inventory. (string, default="")
+      organization:
+        required: false
+        description: Organization containing this inventory. (id, required)
+      kind:
+        required: false
+        description: Kind of inventory being represented. (["", smart], default="")
+      host_filter:
+        required: false
+        description: Filter that will be applied to the hosts of this inventory. (string, default="")
+      variables:
+        required: false
+        description: Inventory variables in JSON or YAML format. (json, default=``)
+      insights_credential:
+        required: false
+        description: Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API. (id, default=``)
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Inventories/Inventories_inventories_create
+        default: {}
+
+  cloudify.datatypes.ansible_tower.Host.config:
+    properties:
+      name:
+        required: false
+        description: Name of this host. (string, required)
+      description:
+        required: false
+        description: Optional description of this host. (string, default="")
+      enabled:
+        required: false
+        description: Is this host online and available for running jobs? (boolean, default=True)
+      instance_id:
+        required: false
+        description: The value used by the remote inventory source to uniquely identify the host (string, default="")
+      variables:
+        required: false
+        description: Host variables in JSON or YAML format. (json, default=``)
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Inventories/Inventories_inventories_hosts_create
+        default: {}
+
+dsl_definitions:
+
+  use_external_resource_desc: &use_external_resource_desc >
+    Indicate whether the resource exists or if Cloudify should create the resource,
+    true if you are bringing an existing resource, false if you want cloudify to create it.
+
+  resource_id_desc: &resource_id_desc >
+    The resource ID of the external resource, if
+    use_external_resource is true. Otherwise it is an empty string.
+
+  # Every operation uses these inputs, unless noted.
+  operation_inputs: &operation_inputs
+    runtime_properties:
+      description: >
+        This overrides any runtime property at runtime. This is a key-value
+        pair / dictionary that will be passed, as-is, to the runtime properties
+        of the running instance.
+      required: false
+      default: ~
+    force_operation:
+      description: >
+        Forces the current operation to be executed regardless
+        if the "use_external_resource" property is set or not.
+      required: false
+      default: false
+    resource_config:
+      description: >
+        Configuration key-value data to be passed as-is to the corresponding
+        API method. 
+      required: false
+      default: {}
+
+  # Every resource uses this property unless noted.
+  external_resource: &external_resource
+    use_external_resource:
+      description: *use_external_resource_desc
+      type: boolean
+      default: false
+
+  # Every resource uses this property unless noted.
+  client_config: &client_config
+    client_config:
+      description: >
+        A dictionary of values to pass to authenticate with the API.
+      type: cloudify.datatypes.ansible_tower.ConnectionConfig
+      required: false
+
+  # Every resource uses this property unless noted.
+  resource_id: &resource_id
+    resource_id:
+      description: *resource_id_desc
+      type: string
+      default: ''
+
+node_types:
+
+  cloudify.ansible_tower.nodes.User:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.User.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.user.create
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.user.delete
+          inputs: *operation_inputs
+
+  cloudify.ansible_tower.nodes.Organization:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.Organization.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.organization.create
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.organization.delete
+          inputs: *operation_inputs
+
+  cloudify.ansible_tower.nodes.Team:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.Team.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.team.create
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.team.delete
+          inputs: *operation_inputs
+
+  cloudify.ansible_tower.nodes.CredentialType:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.CredentialType.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.credential.create_type
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.credential.delete_type
+          inputs: *operation_inputs
+
+  cloudify.ansible_tower.nodes.Credential:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.Credential.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.credential.create
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.credential.delete
+          inputs: *operation_inputs
+
+  cloudify.ansible_tower.nodes.Project:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.Project.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.project.create
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.project.delete
+          inputs: *operation_inputs
+
+  cloudify.ansible_tower.nodes.JobTemplate:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.JobTemplate.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.job_template.create
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.job_template.delete
+          inputs: *operation_inputs
+
+  cloudify.ansible_tower.nodes.Inventory:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.Inventory.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.inventory.create
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.inventory.delete
+          inputs: *operation_inputs
+
+  cloudify.ansible_tower.nodes.Host:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.Host.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.host.create
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.host.delete
+          inputs: *operation_inputs
+
+relationships:
+  cloudify.ansible_tower.relationships.contained_in_organization:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.ansible_tower.relationships.contained_in_project:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.ansible_tower.relationships.contained_in_team:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.ansible_tower.relationships.contained_in_user:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.ansible_tower.relationships.connected_to_team:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.ansible_tower.relationships.connected_to_credential:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.ansible_tower.relationships.connected_to_inventory:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.ansible_tower.relationships.contained_in_inventory:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.ansible_tower.relationships.job_template_connected_to_credential:
+    derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        establish: plugin.cloudify_ansible_tower.resources.job_template.link_credential
+        unlink: plugin.cloudify_ansible_tower.resources.job_template.unlink_credential
+
+  cloudify.ansible_tower.relationships.user_has_role:
+    derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        establish:
+          implementation: plugin.cloudify_ansible_tower.resources.role.add_user
+          inputs:
+            role:
+              description: >
+                Permission to assign (Admin, Use, Execute, Read)
+              default: Admin
+              required: true
+        unlink: 
+          implementation: plugin.cloudify_ansible_tower.resources.role.remove_user
+          inputs:
+            role:
+              default: Admin
+              required: true
+
+  cloudify.ansible_tower.relationships.team_has_role:
+    derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        establish:
+          implementation: plugin.cloudify_ansible_tower.resources.role.add_team
+          inputs:
+            role:
+              description: >
+                Permission to assign (Admin, Use, Execute, Read)
+              default: Admin
+              required: true
+        unlink:
+          implementation: plugin.cloudify_ansible_tower.resources.role.remove_team
+          inputs:
+            role:
+              default: Admin
+              required: true
