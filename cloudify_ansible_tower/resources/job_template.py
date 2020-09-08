@@ -45,13 +45,14 @@ class Job_Template(Resource):
     :param `logging.Logger` logger:
         Parent logger for the class to use. Defaults to `ctx.logger`
     """
-    def __init__(self, logger=None, _ctx=ctx):
+    def __init__(self, logger=None, _ctx=ctx, _id=None):
         Resource.__init__(
             self,
             'Job_Template',
             '/job_templates',
             lookup=['id', 'url', 'name'],
             logger=logger,
+            _id=_id,
             _ctx=_ctx)
 
     def add_credential(self, credential):
@@ -150,6 +151,36 @@ class Job_Template(Resource):
                 if name == r_obj.get(lookup):
                     return r_obj
         return None
+
+    def launch(self):
+        """
+            Launches job template
+        :param dict params: Parameters to be passed as-is to the API
+        :raises: :exc:`cloudify.exceptions.RecoverableError`,
+                 :exc:`cloudify.exceptions.NonRecoverableError`
+        """
+        self.log.info('Launching {0} ({1})'.format(
+            self.name, self.resource_id))
+
+        # Make the request
+        res = self.client.request(
+            method='post', 
+            url=self.resource_url + 'launch/',
+            json=dict())
+        self.log.debug('headers: {0}'.format(dict(res.headers)))
+        headers = self.lowercase_headers(res.headers)
+        # Check the response
+        # If API sent a 400, we're sending bad data
+        if res.status_code == http_codes.bad_request:
+            self.log.info('BAD REQUEST: response: {}'.format(res.content))
+            raise NonRecoverableError(
+                '{0} BAD REQUEST'.format(target.name))
+        # All other errors will be treated as recoverable
+        if res.status_code != http_codes.created:
+            raise RecoverableError(
+                'Expected HTTP status code {0}, recieved {1}'
+                .format(http_codes.created, res.status_code))
+        return res.json()
 
 
 @operation(resumable=True)

@@ -151,3 +151,11 @@ node_templates:
       target: ssh_key
     - type: cloudify.ansible_tower.relationships.team_has_role
       target: team_dev
+
+  job_example:
+    type: cloudify.ansible_tower.nodes.Job
+    properties:
+      client_config: *client_config
+    relationships:
+    - type: cloudify.ansible_tower.relationships.job_contained_in_job_template
+      target: job_template_example

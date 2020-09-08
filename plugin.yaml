@@ -353,6 +353,12 @@ data_types:
         description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Job_Templates/Job_Templates_job_templates_create
         default: {}
 
+  cloudify.datatypes.ansible_tower.Job.config:
+    properties:
+      kwargs:
+        description: https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Job_Templates/Job_Templates_job_templates_launch_create
+        default: {}
+
   cloudify.datatypes.ansible_tower.Inventory.config:
     properties:
       name:
@@ -604,6 +610,27 @@ node_types:
           implementation: plugin.cloudify_ansible_tower.resources.job_template.delete
           inputs: *operation_inputs
 
+  cloudify.ansible_tower.nodes.Job:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *external_resource
+      <<: *client_config
+      <<: *resource_id
+      resource_config:
+        description: >
+          Configuration key-value data to be passed as-is to the corresponding
+          API endpoint.
+        type: cloudify.datatypes.ansible_tower.Job.config
+        required: false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: plugin.cloudify_ansible_tower.resources.job.create
+          inputs: *operation_inputs
+        delete:
+          implementation: plugin.cloudify_ansible_tower.resources.job.delete
+          inputs: *operation_inputs
+
   cloudify.ansible_tower.nodes.Inventory:
     derived_from: cloudify.nodes.Root
     properties:
@@ -677,6 +704,9 @@ relationships:
       cloudify.interfaces.relationship_lifecycle:
         establish: plugin.cloudify_ansible_tower.resources.job_template.link_credential
         unlink: plugin.cloudify_ansible_tower.resources.job_template.unlink_credential
+
+  cloudify.ansible_tower.relationships.job_contained_in_job_template:
+    derived_from: cloudify.relationships.contained_in
 
   cloudify.ansible_tower.relationships.user_has_role:
     derived_from: cloudify.relationships.connected_to

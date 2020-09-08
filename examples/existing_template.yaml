@@ -1,0 +1,41 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  Example for using Ansible Tower plugin
+
+imports:
+- /opt/manager/resources/spec/cloudify/5.0.5/types.yaml
+- plugin:cloudify-ansible-tower-plugin
+
+inputs:
+
+  endpoint:
+    description: YOUR ANSIBLE TOWER API ENDPOINT
+    default: https://tower.eaas.joscor.dev
+
+  access_token:
+    description: YOUR ANSIBLE TOWER API TOKEN
+    default: O9oNn86SeC0pYT2wuITrMU8NRY4WLC
+
+dsl_definitions:
+
+  client_config: &client_config
+    endpoint: { get_input: endpoint }
+    access_token: { get_input: access_token }
+
+node_templates:
+
+  job_template_example:
+    type: cloudify.ansible_tower.nodes.JobTemplate
+    properties:
+      use_external_resource: true
+      resource_id: 53
+      client_config: *client_config
+
+  job_example:
+    type: cloudify.ansible_tower.nodes.Job
+    properties:
+      client_config: *client_config
+    relationships:
+    - type: cloudify.ansible_tower.relationships.job_contained_in_job_template
+      target: job_template_example
