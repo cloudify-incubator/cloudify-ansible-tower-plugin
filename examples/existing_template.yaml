@@ -15,7 +15,7 @@ inputs:
 
   access_token:
     description: YOUR ANSIBLE TOWER API TOKEN
-    default: O9oNn86SeC0pYT2wuITrMU8NRY4WLC
+    default: 9qT5WKMDxx8aSvJFMmgNY3eJ0RwO27
 
 dsl_definitions:
 
