@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=no-member
 """
     resources.Organization
     ~~~~~~~~~~~~~~~~~~~~~~
@@ -21,10 +22,11 @@
 from requests import codes as http_codes
 # Node properties and logger
 from cloudify import ctx
-# Base resource class
-from cloudify_ansible_tower.resources.base import Resource
+from cloudify.exceptions import NonRecoverableError, RecoverableError
 # Lifecycle operation decorator
 from cloudify.decorators import operation
+# Base resource class
+from cloudify_ansible_tower.resources.base import Resource
 # API version
 from cloudify_ansible_tower import utils
 
@@ -61,11 +63,10 @@ class Organization(Resource):
 
         # Make the request
         res = self.client.request(
-            method='post', 
-            url=self.resource_url + 'users/', 
+            method='post',
+            url=self.resource_url + 'users/',
             json=dict(id=user.resource_id))
         self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
         # Check the response
         # If API sent a 400, we're sending bad data
         if res.status_code == http_codes.bad_request:
@@ -91,13 +92,12 @@ class Organization(Resource):
 
         # Make the request
         res = self.client.request(
-            method='post', 
-            url=self.resource_url + 'users/', 
+            method='post',
+            url=self.resource_url + 'users/',
             json=dict(
                 id=user.resource_id,
                 disassociate=True))
         self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
         # Check the response
         # If API sent a 400, we're sending bad data
         if res.status_code == http_codes.bad_request:

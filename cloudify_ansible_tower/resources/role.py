@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=no-member
 """
     resources.Role
     ~~~~~~~~~~~~~~
@@ -25,15 +26,13 @@ from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError, RecoverableError
 # Lifecycle operation decorator
 from cloudify.decorators import operation
-# API version
-from cloudify_ansible_tower import utils
 # Base resource class
 from cloudify_ansible_tower.resources.base import Resource
 # Resources
 from cloudify_ansible_tower.resources.team import Team
 from cloudify_ansible_tower.resources.user import User
 from cloudify_ansible_tower.resources.project import Project
-from cloudify_ansible_tower.resources.job_template import Job_Template
+from cloudify_ansible_tower.resources.job_template import JobTemplate
 
 
 class Role(Resource):
@@ -65,18 +64,18 @@ class Role(Resource):
                  :exc:`cloudify.exceptions.NonRecoverableError`
         """
         self.log.info('Adding {0}({1}) to {2}({3})'.format(
-            user.name, user.resource_id, 
+            user.name, user.resource_id,
             target.name, target.resource_id))
 
-        self.log.debug('Calling {0}'.format(target.lookup_role(role)['related'][user.name.lower() + 's']))
+        self.log.debug('Calling {0}'.format(
+            target.lookup_role(role)['related'][user.name.lower() + 's']))
 
         # Make the request
         res = target.client.request(
-            method='post', 
-            url=target.lookup_role(role)['related'][user.name.lower() + 's'], 
+            method='post',
+            url=target.lookup_role(role)['related'][user.name.lower() + 's'],
             json=dict(id=user.resource_id))
         self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
         # Check the response
         # If API sent a 400, we're sending bad data
         if res.status_code == http_codes.bad_request:
@@ -99,18 +98,17 @@ class Role(Resource):
                  :exc:`cloudify.exceptions.NonRecoverableError`
         """
         self.log.info('Removing {0}({1}) from {2}({3})'.format(
-            user.name, user.resource_id, 
+            user.name, user.resource_id,
             target.name, target.resource_id))
 
         # Make the request
         res = target.client.request(
-            method='post', 
-            url=target.lookup_role(role)['related'][user.name.lower() + 's'], 
+            method='post',
+            url=target.lookup_role(role)['related'][user.name.lower() + 's'],
             json=dict(
                 id=user.resource_id,
                 disassociate=True))
         self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
         # Check the response
         # If API sent a 400, we're sending bad data
         if res.status_code == http_codes.bad_request:
@@ -125,19 +123,21 @@ class Role(Resource):
 
 
 CLASS_MAP = {
-  'cloudify.ansible_tower.nodes.JobTemplate': Job_Template,
+  'cloudify.ansible_tower.nodes.JobTemplate': JobTemplate,
   'cloudify.ansible_tower.nodes.Project': Project
 }
 
 
 @operation(resumable=True)
 def add_user(role, **_):
+    """Add User to Role"""
     Role(_ctx=ctx.source).add(
         CLASS_MAP[ctx.source.node.type](_ctx=ctx.source),
         User(_ctx=ctx.target), role)
 
 @operation(resumable=True)
 def remove_user(role, **_):
+    """Remove User from Role"""
     Role(_ctx=ctx.source).remove(
         CLASS_MAP[ctx.source.node.type](_ctx=ctx.source),
         User(_ctx=ctx.target), role)
@@ -145,6 +145,7 @@ def remove_user(role, **_):
 
 @operation(resumable=True)
 def add_team(role, **_):
+    """Add Team to Role"""
     Role(_ctx=ctx.source).add(
         CLASS_MAP[ctx.source.node.type](_ctx=ctx.source),
         Team(_ctx=ctx.target), role)
@@ -152,6 +153,7 @@ def add_team(role, **_):
 
 @operation(resumable=True)
 def remove_team(role, **_):
+    """Remove Team from Role"""
     Role(_ctx=ctx.source).remove(
         CLASS_MAP[ctx.source.node.type](_ctx=ctx.source),
         Team(_ctx=ctx.target), role)

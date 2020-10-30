@@ -60,7 +60,7 @@ def create_child_logger(name,
 def dict_update(orig, updates):
     """Recursively merges two objects"""
     for key, val in updates.items():
-        if isinstance(val, Mapping):
+        if isinstance(val, dict):
             orig[key] = dict_update(orig.get(key, {}), val)
         else:
             orig[key] = updates[key]
@@ -81,10 +81,13 @@ def get_credentials(_ctx=ctx):
     return APICredentials(**properties)
 
 
-def runtime_properties_cleanup(ctx):
+def runtime_properties_cleanup(_ctx=ctx):
+    """
+        Deletes all runtime properties
+    """
     # cleanup runtime properties
-    for key in list(ctx.instance.runtime_properties.keys()):
-        del ctx.instance.runtime_properties[key]
+    for key in list(_ctx.instance.runtime_properties.keys()):
+        del _ctx.instance.runtime_properties[key]
 
 
 def get_resource_name(_ctx=ctx):
@@ -134,7 +137,7 @@ def task_resource_delete(resource, _ctx=ctx):
     """
     # Check for existing resources
     if _ctx.node.properties.get('use_external_resource'):
-        return resource.get()
+        return
     # Delete the resource
     if resource.exists():
         resource.delete()

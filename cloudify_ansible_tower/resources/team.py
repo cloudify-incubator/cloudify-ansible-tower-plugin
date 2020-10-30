@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=no-member
 """
     resources.Team
     ~~~~~~~~~~~~~~
@@ -65,11 +66,10 @@ class Team(Resource):
 
         # Make the request
         res = self.client.request(
-            method='post', 
-            url=self.resource_url + 'users/', 
+            method='post',
+            url=self.resource_url + 'users/',
             json=dict(id=user.resource_id))
         self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
         # Check the response
         # If API sent a 400, we're sending bad data
         if res.status_code == http_codes.bad_request:
@@ -95,13 +95,12 @@ class Team(Resource):
 
         # Make the request
         res = self.client.request(
-            method='post', 
-            url=self.resource_url + 'users/', 
+            method='post',
+            url=self.resource_url + 'users/',
             json=dict(
                 id=user.resource_id,
                 disassociate=True))
         self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
         # Check the response
         # If API sent a 400, we're sending bad data
         if res.status_code == http_codes.bad_request:

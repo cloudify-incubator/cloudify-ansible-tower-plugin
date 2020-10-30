@@ -20,10 +20,10 @@
 
 # Node properties and logger
 from cloudify import ctx
-# Base resource class
-from cloudify_ansible_tower.resources.base import Resource
 # Lifecycle operation decorator
 from cloudify.decorators import operation
+# Base resource class
+from cloudify_ansible_tower.resources.base import Resource
 # API version
 from cloudify_ansible_tower import utils
 # Resources

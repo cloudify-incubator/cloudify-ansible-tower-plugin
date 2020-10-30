@@ -18,11 +18,8 @@
     Ansible Tower Host interface
 """
 
-from requests import codes as http_codes
 # Node properties and logger
 from cloudify import ctx
-# Exceptions
-from cloudify.exceptions import NonRecoverableError, RecoverableError
 # Lifecycle operation decorator
 from cloudify.decorators import operation
 # API version
@@ -64,9 +61,9 @@ def create(**_):
         'cloudify.ansible_tower.relationships.contained_in_inventory')
     # Compatibility
     if not rel_inventory:
-      rel_inventory = utils.get_relationship_by_type(
-          ctx.instance.relationships,
-          'cloudify.ansible_tower.relationships.connected_to_inventory')
+        rel_inventory = utils.get_relationship_by_type(
+            ctx.instance.relationships,
+            'cloudify.ansible_tower.relationships.connected_to_inventory')
     if rel_inventory:
         config['inventory'] = utils.get_resource_name(rel_inventory.target)
     elif config.get('inventory'):

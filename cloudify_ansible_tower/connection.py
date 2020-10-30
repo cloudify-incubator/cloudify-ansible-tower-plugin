@@ -24,8 +24,6 @@
 import json
 import requests
 from requests.packages import urllib3
-from requests.compat import urlparse
-from future.moves.urllib.parse import parse_qs
 
 from cloudify import ctx
 from cloudify_ansible_tower import utils
@@ -41,6 +39,7 @@ class Connection(object):
     def __init__(self, api_version='v2', logger=None, _ctx=ctx):
         # Set the active context
         self.ctx = _ctx
+        self.api_version = api_version
         # Configure logger
         self.log = utils.create_child_logger(
             'connection',
@@ -59,7 +58,7 @@ class Connection(object):
         """
             Builds, and executes, a request to the
             Ansible Tower API service.  The parameters
-            are passed as-is to the underlying 
+            are passed as-is to the underlying
             requests.Session.request() function.
 
         :returns: A configured requests.Session instance
@@ -116,4 +115,3 @@ class Connection(object):
             'Content-Type': 'application/json'
         }
         return session
-

@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=no-member
 """
-    resources.Job_Template
-    ~~~~~~~~~~~~~~~~~~~~~~
-    Ansible Tower Job_Template interface
+    resources.JobTemplate
+    ~~~~~~~~~~~~~~~~~~~~~
+    Ansible Tower JobTemplate interface
 """
 
 from requests import codes as http_codes
@@ -35,9 +36,9 @@ from cloudify_ansible_tower.resources.project import Project
 from cloudify_ansible_tower.resources.inventory import Inventory
 
 
-class Job_Template(Resource):
+class JobTemplate(Resource):
     """
-        Ansible Tower Job_Template interface
+        Ansible Tower JobTemplate interface
     .. warning::
         This interface should only be instantiated from
         within a Cloudify Lifecycle Operation
@@ -48,7 +49,7 @@ class Job_Template(Resource):
     def __init__(self, logger=None, _ctx=ctx, _id=None):
         Resource.__init__(
             self,
-            'Job_Template',
+            'JobTemplate',
             '/job_templates',
             lookup=['id', 'url', 'name'],
             logger=logger,
@@ -65,22 +66,21 @@ class Job_Template(Resource):
                  :exc:`cloudify.exceptions.NonRecoverableError`
         """
         self.log.info('Adding {0}({1}) to {2}({3})'.format(
-            credential.name, credential.resource_id, 
+            credential.name, credential.resource_id,
             self.name, self.resource_id))
 
         # Make the request
         res = self.client.request(
-            method='post', 
+            method='post',
             url=self.resource_url + 'credentials/',
             json=dict(id=credential.resource_id))
         self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
         # Check the response
         # If API sent a 400, we're sending bad data
         if res.status_code == http_codes.bad_request:
             self.log.info('BAD REQUEST: response: {}'.format(res.content))
             raise NonRecoverableError(
-                '{0} BAD REQUEST'.format(target.name))
+                '{0} BAD REQUEST'.format(self.name))
         # All other errors will be treated as recoverable
         if res.status_code != http_codes.no_content:
             raise RecoverableError(
@@ -97,60 +97,28 @@ class Job_Template(Resource):
                  :exc:`cloudify.exceptions.NonRecoverableError`
         """
         self.log.info('Removing {0}({1}) from {2}({3})'.format(
-            credential.name, credential.resource_id, 
+            credential.name, credential.resource_id,
             self.name, self.resource_id))
 
         # Make the request
         res = self.client.request(
-            method='post', 
+            method='post',
             url=self.resource_url + 'credentials/',
             json=dict(
               id=credential.resource_id,
               disassociate=True))
         self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
         # Check the response
         # If API sent a 400, we're sending bad data
         if res.status_code == http_codes.bad_request:
             self.log.info('BAD REQUEST: response: {}'.format(res.content))
             raise NonRecoverableError(
-                '{0} BAD REQUEST'.format(target.name))
+                '{0} BAD REQUEST'.format(self.name))
         # All other errors will be treated as recoverable
         if res.status_code != http_codes.no_content:
             raise RecoverableError(
                 'Expected HTTP status code {0}, recieved {1}'
                 .format(http_codes.no_content, res.status_code))
-
-    def lookup_role(self, name):
-        """
-            Find a resource
-        :param string name: Name/ID of the existing resource
-        :returns: Resource
-        :rtype: dict
-        :raises: :exc:`cloudify.exceptions.RecoverableError`,
-                 :exc:`cloudify.exceptions.NonRecoverableError`,
-        """
-        _lookup = ['id', 'url', 'name']
-        self.log.info('Retrieving roles for {0}'.format(self.name))
-        # Make the request
-        res = self.client.request(
-            method='get', 
-            url=self.resource_url + 'object_roles/')
-        self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
-        # Check the response
-        # HTTP 200 (OK) - The resource already exists
-        if res.status_code != http_codes.ok:
-            raise RecoverableError(
-                'Expected HTTP status code {0}, recieved {1}'
-                .format(http_codes.ok, res.status_code))
-        # Get list of resources
-        obj = None
-        for r_obj in res.json().get('results', list()):
-            for lookup in _lookup:
-                if name == r_obj.get(lookup):
-                    return r_obj
-        return None
 
     def launch(self):
         """
@@ -164,17 +132,16 @@ class Job_Template(Resource):
 
         # Make the request
         res = self.client.request(
-            method='post', 
+            method='post',
             url=self.resource_url + 'launch/',
             json=dict())
         self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
         # Check the response
         # If API sent a 400, we're sending bad data
         if res.status_code == http_codes.bad_request:
             self.log.info('BAD REQUEST: response: {}'.format(res.content))
             raise NonRecoverableError(
-                '{0} BAD REQUEST'.format(target.name))
+                '{0} BAD REQUEST'.format(self.name))
         # All other errors will be treated as recoverable
         if res.status_code != http_codes.created:
             raise RecoverableError(
@@ -185,7 +152,7 @@ class Job_Template(Resource):
 
 @operation(resumable=True)
 def create(**_):
-    """Uses an existing, or creates a new, Job_Template"""
+    """Uses an existing, or creates a new, JobTemplate"""
     config = ctx.node.properties.get('resource_config')
 
     # Get project reference
@@ -209,22 +176,24 @@ def create(**_):
             Inventory().lookup_id(config['inventory'])
 
     ctx.instance.runtime_properties['resource'] = \
-        utils.task_resource_create(Job_Template(), config)
+        utils.task_resource_create(JobTemplate(), config)
     ctx.instance.runtime_properties['resource_id'] = \
         ctx.instance.runtime_properties['resource'].get('id')
 
 
 @operation(resumable=True)
 def delete(**_):
-    """Deletes a Job_Template"""
-    utils.task_resource_delete(Job_Template())
+    """Deletes a JobTemplate"""
+    utils.task_resource_delete(JobTemplate())
 
 @operation(resumable=True)
 def link_credential(**_):
-    Job_Template(_ctx=ctx.source).add_credential(
+    """Add Credential to JobTemplate"""
+    JobTemplate(_ctx=ctx.source).add_credential(
         Credential(_ctx=ctx.target))
 
 @operation(resumable=True)
 def unlink_credential(**_):
-    Job_Template(_ctx=ctx.source).remove_credential(
+    """Remove Credential from JobTemplate"""
+    JobTemplate(_ctx=ctx.source).remove_credential(
         Credential(_ctx=ctx.target))

@@ -12,17 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=no-member
 """
     resources.Project
     ~~~~~~~~~~~~~~~~~
     Ansible Tower Project interface
 """
 
-from requests import codes as http_codes
 # Node properties and logger
 from cloudify import ctx
-# Exceptions
-from cloudify.exceptions import NonRecoverableError, RecoverableError
 # Lifecycle operation decorator
 from cloudify.decorators import operation
 # API version
@@ -51,37 +49,6 @@ class Project(Resource):
             lookup=['id', 'url', 'name'],
             logger=logger,
             _ctx=_ctx)
-
-    def lookup_role(self, name):
-        """
-            Find a resource
-        :param string name: Name/ID of the existing resource
-        :returns: Resource
-        :rtype: dict
-        :raises: :exc:`cloudify.exceptions.RecoverableError`,
-                 :exc:`cloudify.exceptions.NonRecoverableError`,
-        """
-        _lookup = ['id', 'url', 'name']
-        self.log.info('Retrieving roles for {0}'.format(self.name))
-        # Make the request
-        res = self.client.request(
-            method='get', 
-            url=self.resource_url + 'object_roles/')
-        self.log.debug('headers: {0}'.format(dict(res.headers)))
-        headers = self.lowercase_headers(res.headers)
-        # Check the response
-        # HTTP 200 (OK) - The resource already exists
-        if res.status_code != http_codes.ok:
-            raise RecoverableError(
-                'Expected HTTP status code {0}, recieved {1}'
-                .format(http_codes.ok, res.status_code))
-        # Get list of resources
-        obj = None
-        for r_obj in res.json().get('results', list()):
-            for lookup in _lookup:
-                if name == r_obj.get(lookup):
-                    return r_obj
-        return None
 
 
 @operation(resumable=True)

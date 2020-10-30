@@ -18,11 +18,8 @@
     Ansible Tower Job interface
 """
 
-from requests import codes as http_codes
 # Node properties and logger
 from cloudify import ctx
-# Exceptions
-from cloudify.exceptions import NonRecoverableError, RecoverableError
 # Lifecycle operation decorator
 from cloudify.decorators import operation
 # API version
@@ -30,7 +27,7 @@ from cloudify_ansible_tower import utils
 # Base resource class
 from cloudify_ansible_tower.resources.base import Resource
 # Resources
-from cloudify_ansible_tower.resources.job_template import Job_Template
+from cloudify_ansible_tower.resources.job_template import JobTemplate
 
 
 class Job(Resource):
@@ -66,9 +63,9 @@ def create(**_):
         job_template_id = utils.get_resource_name(rel_template.target)
     elif config.get('job_template'):
         job_template_id = \
-            Job_Template().lookup_id(config['job_template'])
+            JobTemplate().lookup_id(config['job_template'])
 
-    resource = Job_Template(_id=job_template_id).launch()
+    resource = JobTemplate(_id=job_template_id).launch()
 
     ctx.instance.runtime_properties['resource'] = resource
     ctx.instance.runtime_properties['resource_id'] = resource.get('job')
