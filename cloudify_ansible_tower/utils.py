@@ -77,7 +77,8 @@ def get_credentials(_ctx=ctx):
     """
     cred_keys = ['endpoint', 'endpoint_verify', 'access_token']
     props = _ctx.node.properties.get('client_config')
-    properties = {k: props[k] for k in cred_keys if props.get(k)}
+    properties = {
+        k: props[k] for k in cred_keys if props.get(k) is not None }
     return APICredentials(**properties)
 
 

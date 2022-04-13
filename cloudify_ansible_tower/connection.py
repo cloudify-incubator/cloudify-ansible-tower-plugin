@@ -107,7 +107,7 @@ class Connection(object):
                 )))
         # SSL Verification
         if not self.creds.endpoint.startswith('http://'):
-            requests.verify = self.creds.endpoint_verify
+            session.verify = self.creds.endpoint_verify
         # Set the API access token for the session
         session.headers = {
             'Authorization': 'Bearer {0}'.format(
