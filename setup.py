@@ -26,7 +26,7 @@ setup(
     ],
     description='Cloudify plugin for Ansible Tower / AWX',
     install_requires=[
-        'cloudify-common==5.0.5.1',
+        'cloudify-common>=4.5',
         'requests~=2.23.0'
     ]
 )
