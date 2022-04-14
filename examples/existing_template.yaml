@@ -1,27 +1,37 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 description: >
-  Example for using Ansible Tower plugin
+  Example for using Ansible Tower plugin using existing resources
 
 imports:
-- /opt/manager/resources/spec/cloudify/5.0.5/types.yaml
+- http://cloudify.co/spec/cloudify/6.3.1/types.yaml
 - plugin:cloudify-ansible-tower-plugin
 
 inputs:
 
   endpoint:
-    description: YOUR ANSIBLE TOWER API ENDPOINT
+    type: string
+    description: |
+      Ansible Tower API Endpoint.
+      Should contain the prefix 'http://' or 'https://'.
     default: https://tower.eaas.joscor.dev
 
   access_token:
-    description: YOUR ANSIBLE TOWER API TOKEN
-    default: 9qT5WKMDxx8aSvJFMmgNY3eJ0RwO27
+    type: string
+    description: Your User's Ansible Tower Token.
+    default: { get_secret: ansible_tower_token }
+
+  endpoint_verify:
+    type: boolean
+    description: Enable SSL certificate verification.
+    default: false
 
 dsl_definitions:
 
   client_config: &client_config
     endpoint: { get_input: endpoint }
     access_token: { get_input: access_token }
+    endpoint_verify: { get_input: endpoint_verify }
 
 node_templates:
 

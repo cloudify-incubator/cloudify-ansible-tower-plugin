@@ -1,27 +1,37 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 description: >
-  Example for using Ansible Tower plugin
+  Example for using Ansible Tower plugin and create resources
 
 imports:
-- /opt/manager/resources/spec/cloudify/5.0.5/types.yaml
+- http://cloudify.co/spec/cloudify/6.3.1/types.yaml
 - plugin:cloudify-ansible-tower-plugin
 
 inputs:
 
   endpoint:
-    description: YOUR ANSIBLE TOWER API ENDPOINT
+    type: string
+    description: |
+      Ansible Tower API Endpoint.
+      Should contain the prefix 'http://' or 'https://'.
     default: https://tower.eaas.joscor.dev
 
   access_token:
-    description: YOUR ANSIBLE TOWER API TOKEN
-    default: 9qT5WKMDxx8aSvJFMmgNY3eJ0RwO27
+    type: string
+    description: Your User's Ansible Tower Token.
+    default: { get_secret: ansible_tower_token }
+
+  endpoint_verify:
+    type: boolean
+    description: Enable SSL certificate verification.
+    default: false
 
 dsl_definitions:
 
   client_config: &client_config
     endpoint: { get_input: endpoint }
     access_token: { get_input: access_token }
+    endpoint_verify: { get_input: endpoint_verify }
 
 node_templates:
 
@@ -45,13 +55,13 @@ node_templates:
     - type: cloudify.ansible_tower.relationships.contained_in_organization
       target: org_cloudify
 
-  user_jcornutt:
+  user:
     type: cloudify.ansible_tower.nodes.User
     properties:
       resource_config:
-        username: jcornutt
-        first_name: Joshua
-        last_name: Cornutt
+        username: cloudify
+        first_name: John
+        last_name: Smith
         password: 1nS3Cur3P455w0rD
       client_config: *client_config
     relationships:
@@ -68,30 +78,7 @@ node_templates:
         credential_type: Machine
         inputs:
           username: ubuntu
-          ssh_key_data: |
-            -----BEGIN RSA PRIVATE KEY-----
-            MIIEogIBAAKCAQEAu588SannURy58yJ50v66gRNwcEZBWCDZlTcll44j8gE6JtMfL1q5BO7mssAx
-            caYWnffLYjsCaNvXGyYyw6PKAHGkcIfa4yV+YB2g4RLAwOS4QGxvzyZ2v5E6fdXk3xzRS8Pw6sQZ
-            QzDRqaJI2Pwv+DaZVDv9ObfZ0ampO5u8onr9SlBSPfh/0XGiFh1ZujqYHVTaHYg+wgbYG2fU+zSD
-            wHn+OJvW7iPXhCWf/NqQekz6YdYXfDXvPLNZPGEKbFhJBX6+nN2DKPZs37CJRxSN4denqWL7Gkwd
-            RFArvgMrc/WCUYtxnC5zUXWx0WRIwnFovu2Ty00Gh2955HA42zVGKQIDAQABAoIBAAYahAeRc2j8
-            GkCCmpv2lXKlgz7jyjRnvSxRgvOPODQjPhUNQTJ1LRev/elKv1EHKi0xZnhnmwh2PmUvtO8QYP3q
-            tILEqKZDDf1qeVVZGtQrnKLb5DdE9Q/+VXzKfIuVkGl6klfQ0VGSQP/Xu67zZUwZ2psW6IH8LSXY
-            8xxxUI2ojFpS7ZvjM57gOsX2+Z8Bg74WSbuGeWOG3LG/kOzB/3PwVXmyw1iDFZUecce1cu1D5HxO
-            +oQWKxAyjs0R2YkAqpBO3IAy/LXn1CW4Zbn5Xkwui0+/L2L06xYdqV2y6b3Dxf9IDYW0YBFHHcZv
-            S7tATJ8LhfFafeYosPywqvPVdZECgYEA3UzQCidG35xvjzSNTSkMUJnEFIhUaWbN/jtt3oaOJMnP
-            +UFDT9ouzZuG04VuP+KZ33Lbx/6IicRM1+phEqZi+csupgtiTnbnd7XqjBEyEO49JIv1MmJbZjcZ
-            94m20pKuJW58aw/s1z/20e9chPxamTrQzfq7itG05htlSiR08ScCgYEA2QqON+aRBkL0bWT0e0dR
-            fdXu7qvAc515L0uISngkLy5nkXM8EIfl5dycDJFzruLEqoTlUYY9lqg8W+bQle4KA7QjVLf3fo34
-            ngr4AbqOZyblBQBPoROkGhwC37+NQUOO9MZ5jkMF1vJfxMzEvi9FakBfanPRc/JqeD4JiNR7AC8C
-            gYA+TOuckCYhuZamiDLncBDpeAB9j0vESI7hbbWmmdbWgIIuN7NNfa0DcS9pyPyau556C4nYKc4i
-            isLfXjpp17GxhQPi9v17/Xl4eBxJxmWD4q4P5d7nik0U35pN19VCPs0L+KjKMzeH+ZfwziQLxEd1
-            L9uswVOe5x64USoYz16krQKBgEZq3U+Xt+/PI1ymx4eD0RXBpj67bLpWGi5VFEgNCLhiFuoi+Bbo
-            8JcOZ3bQbjcMjgBBE+HKawsJVGQA1CYA0DD5bgkbkun1h/dG2cY9z9v5y44+1pcNN03dTrVngZ3u
-            HGCgUGnupuNhSd8hDKgj0CKz9gEkyI0U1qRihFdnkOyzAoGABoBElYgImBKInuqeZqqMvkfIcK2I
-            L6QHdB1sZIqFd+h61obZ46kP7UriiKTvAPm5GqQ4HYXWCUwsqkvgiFMasrdQxGgT4aOkvVW08pHJ
-            eP2CrGJO/yJB9jIpXEfCXe8Mmvkosibau3q7raJiXfgRc1frdSZ/hJJXW1S6tvxGTZc=
-            -----END RSA PRIVATE KEY-----
+          ssh_key_data: { get_secret: ssh_key }
       client_config: *client_config
     relationships:
     - type: cloudify.ansible_tower.relationships.contained_in_team
@@ -127,9 +114,8 @@ node_templates:
     type: cloudify.ansible_tower.nodes.Host
     properties:
       resource_config:
-        name: !!str 172.18.0.1
-        description: |
-          Local docker host
+        name: '172.18.0.1'
+        description: Local docker host
       client_config: *client_config
     relationships:
     - type: cloudify.ansible_tower.relationships.contained_in_inventory
