@@ -7,7 +7,7 @@ plugins:
     executor: central_deployment_agent
     source: https://github.com/cloudify-incubator/cloudify-ansible-tower-plugin/archive/1.0.0.zip
     package_name: cloudify-ansible-tower-plugin
-    package_version: '1.0.0'
+    package_version: '1.0.1'
 
 data_types:
 
