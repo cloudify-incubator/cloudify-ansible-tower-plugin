@@ -1,0 +1,4 @@
+1.0.1:
+    - Ansible Tower Job removal fix
+1.0.0:
+    - Initial version compatible with Python 3.x

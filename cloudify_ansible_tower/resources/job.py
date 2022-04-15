@@ -74,4 +74,6 @@ def create(**_):
 @operation(resumable=True)
 def delete(**_):
     """Deletes a Job"""
-    utils.task_resource_delete(Job())
+    job_object = Job()
+    job_object.resource_id = ctx.instance.runtime_properties['resource_id']
+    utils.task_resource_delete(job_object)
